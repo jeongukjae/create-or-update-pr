@@ -27,7 +27,7 @@ jobs:
         with:
           script: |
             const { BRANCH } = process.env
-            const pulls = github.rest.pulls.list({
+            const pulls = await github.rest.pulls.list({
               owner: context.repo.owner,
               repo: context.repo.repo,
               head: `jeongukjae:${BRANCH}`
