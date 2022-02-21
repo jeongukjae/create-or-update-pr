@@ -12,8 +12,10 @@ jobs:
       - uses: actions/checkout@v2
 
       - name: Run a multi-line script
+        id: res
         run: |
           date > date.txt
+          OUT=$(cat date.txt)
 
           git config user.name 'github-actions[bot]'
           git config user.email 'github-actions[bot]@users.noreply.github.com'
@@ -22,6 +24,8 @@ jobs:
           git checkout -b ${BRANCH}
           git commit -m "(bot) update date.txt"
           git push -f -u origin ${BRANCH}
+          
+          echo ::set-output name=OUT::$OUT
 
       - uses: actions/github-script@v6
         with:
@@ -42,12 +46,13 @@ jobs:
                 base: "main",
                 head: `jeongukjae:${BRANCH}`,
                 title: "Automated PR!",
+                body: "${{ steps.update-step.res.OUT }}",
               })
             } else {
               github.rest.issues.createComment({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 issue_number: pr_data[0].number,
-                body: "PR is updated",
+                body: "PR is updated - ${{ steps.update-step.res.OUT }}",
               });
             }
