@@ -30,7 +30,7 @@ jobs:
             const pr_response = await github.rest.pulls.list({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              head: `jeongukjae:${BRANCH}`
+              head: `jeongukjae:${BRANCH}`,
               state: "open",
             });
             const pr_data = pr_response.data;
