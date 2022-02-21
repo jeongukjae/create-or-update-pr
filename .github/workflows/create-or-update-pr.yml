@@ -27,13 +27,13 @@ jobs:
         with:
           script: |
             const { BRANCH } = process.env
-            const pulls = await github.rest.pulls.list({
+            const pr_response = await github.rest.pulls.list({
               owner: context.repo.owner,
               repo: context.repo.repo,
               head: `jeongukjae:${BRANCH}`
             });
-            console.log(pulls)
-            if (pulls.length == 0) {
+            const pr_data = pr_response.data;
+            if (pr_data.length == 0) {
               github.rest.pulls.create({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
@@ -42,11 +42,10 @@ jobs:
                 title: "Automated PR!",
               })
             } else {
-              console.log(pulls[0])
               github.rest.issues.createComment({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
-                issue_number: pulls[0].id,
+                issue_number: pr_data[0].id,
                 body: "PR is updated",
               });
             }
