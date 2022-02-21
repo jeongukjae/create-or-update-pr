@@ -1,0 +1,62 @@
+name: create or update
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      BRANCH: auto/pr-something
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Run a multi-line script
+        id: res
+        run: |
+          date > date.txt
+          OUT=$(cat date.txt)
+
+          git config user.name 'github-actions[bot]'
+          git config user.email 'github-actions[bot]@users.noreply.github.com'
+
+          git add date.txt
+          git checkout -b ${BRANCH}
+          git commit -m "(bot) update date.txt"
+          git push -f -u origin ${BRANCH}
+          
+          echo ::set-output name=OUT::$OUT
+          echo ::set-output name=DO_PR::false
+
+      - uses: actions/github-script@v6
+        if: steps.res.outputs.DO_PR == 'true'
+        env:
+          OUT: ${{ steps.res.outputs.OUT }}
+        with:
+          script: |
+            const { BRANCH, OUT } = process.env
+            const pr_response = await github.rest.pulls.list({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              head: `jeongukjae:${BRANCH}`,
+              state: "open",
+            });
+            const pr_data = pr_response.data;
+            
+            if (pr_data.length == 0) {
+              github.rest.pulls.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                base: "main",
+                head: `jeongukjae:${BRANCH}`,
+                title: "Automated PR!",
+                body: `date: ${OUT}`,
+              })
+            } else {
+              github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: pr_data[0].number,
+                body: `PR is updated - date: ${OUT}`
+              });
+            }
