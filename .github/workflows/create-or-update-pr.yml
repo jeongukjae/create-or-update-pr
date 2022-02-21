@@ -31,8 +31,10 @@ jobs:
               owner: context.repo.owner,
               repo: context.repo.repo,
               head: `jeongukjae:${BRANCH}`
+              state: "open",
             });
             const pr_data = pr_response.data;
+            
             if (pr_data.length == 0) {
               github.rest.pulls.create({
                 owner: context.repo.owner,
