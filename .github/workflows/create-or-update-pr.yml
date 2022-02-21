@@ -32,6 +32,7 @@ jobs:
               repo: context.repo.repo,
               head: `jeongukjae:${BRANCH}`
             });
+            console.log(pulls)
             if (pulls.length == 0) {
               github.rest.pulls.create({
                 owner: context.repo.owner,
@@ -41,6 +42,7 @@ jobs:
                 title: "Automated PR!",
               })
             } else {
+              console.log(pulls[0])
               github.rest.issues.createComment({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
