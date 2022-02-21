@@ -28,9 +28,11 @@ jobs:
           echo ::set-output name=OUT::$OUT
 
       - uses: actions/github-script@v6
+        env:
+          OUT: ${{ steps.res.outputs.OUT }}
         with:
           script: |
-            const { BRANCH } = process.env
+            const { BRANCH, OUT } = process.env
             const pr_response = await github.rest.pulls.list({
               owner: context.repo.owner,
               repo: context.repo.repo,
@@ -46,13 +48,13 @@ jobs:
                 base: "main",
                 head: `jeongukjae:${BRANCH}`,
                 title: "Automated PR!",
-                body: "${{ steps.update-step.res.OUT }}",
+                body: `date: ${OUT}`,
               })
             } else {
               github.rest.issues.createComment({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 issue_number: pr_data[0].number,
-                body: "PR is updated - ${{ steps.update-step.res.OUT }}",
+                body: `PR is updated - date: ${OUT}`
               });
             }
